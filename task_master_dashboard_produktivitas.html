@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster - Dashboard Produktivitas Modern</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass-card {
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Task Item Transitions */
+        .task-item {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .task-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .task-enter {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        .task-exit {
+            animation: slideOut 0.25s ease-in forwards;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+                max-height: 100px;
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95);
+                max-height: 0;
+                margin-top: 0;
+                margin-bottom: 0;
+                padding-top: 0;
+                padding-bottom: 0;
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 163, 175, 0.4);
+            border-radius: 9999px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgba(75, 85, 99, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-40 w-full glass-card border-b border-slate-200/50 dark:border-slate-800/50 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/30">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">TaskMaster</h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium hidden sm:block">Dashboard Produktivitas Pro</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50" aria-label="Toggle Theme">
+                    <!-- Sun Icon -->
+                    <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <!-- Moon Icon -->
+                    <svg id="moonIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                    </svg>
+                </button>
+
+                <!-- New Task Quick Button -->
+                <button onclick="openModal()" class="px-4 py-2.5 bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white rounded-xl font-medium text-sm shadow-md shadow-brand-500/20 hover:shadow-lg hover:shadow-brand-500/30 transition-all duration-200 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span class="hidden sm:inline">Tambah Tugas</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Dashboard Statistics Cards -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <!-- Total Tasks -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tugas</p>
+                        <h3 id="statTotal" class="text-3xl font-extrabold mt-1 text-slate-800 dark:text-white">0</h3>
+                    </div>
+                    <div class="p-3 bg-blue-500/10 dark:bg-blue-500/20 text-brand-600 dark:text-brand-400 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Tasks -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">Pending</p>
+                        <h3 id="statPending" class="text-3xl font-extrabold mt-1 text-slate-800 dark:text-white">0</h3>
+                    </div>
+                    <div class="p-3 bg-amber-500/10 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Tasks -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Selesai</p>
+                        <h3 id="statCompleted" class="text-3xl font-extrabold mt-1 text-slate-800 dark:text-white">0</h3>
+                    </div>
+                    <div class="p-3 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Bar Card -->
+            <div class="glass-card rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Progres Selesai</p>
+                    <span id="statPercentText" class="text-sm font-bold text-brand-600 dark:text-brand-400">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-brand-500 to-indigo-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filter & Search Toolbar -->
+        <section class="glass-card rounded-2xl p-4 sm:p-5 shadow-sm flex flex-col md:flex-row gap-4 justify-between items-center">
+            <!-- Search Bar -->
+            <div class="relative w-full md:w-80">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" id="searchInput" placeholder="Cari tugas..." class="w-full pl-10 pr-4 py-2.5 bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all placeholder-slate-400">
+            </div>
+
+            <!-- Status Filters & Priority Filter -->
+            <div class="flex flex-wrap items-center justify-between md:justify-end gap-3 w-full md:w-auto">
+                <!-- Status Tabs -->
+                <div class="flex bg-slate-200/60 dark:bg-slate-800/60 p-1 rounded-xl text-xs sm:text-sm font-medium w-full sm:w-auto justify-center">
+                    <button onclick="setFilterStatus('all')" id="filterAll" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">Semua</button>
+                    <button onclick="setFilterStatus('active')" id="filterActive" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">Aktif</button>
+                    <button onclick="setFilterStatus('completed')" id="filterCompleted" class="px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">Selesai</button>
+                </div>
+
+                <!-- Priority Dropdown -->
+                <select id="priorityFilter" onchange="renderTasks()" class="bg-white/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 text-sm rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all cursor-pointer">
+                    <option value="all">Semua Prioritas</option>
+                    <option value="tinggi">Prioritas Tinggi</option>
+                    <option value="sedang">Prioritas Sedang</option>
+                    <option value="rendah">Prioritas Rendah</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Task List Container -->
+        <section>
+            <div id="taskList" class="space-y-3">
+                <!-- Task items rendered dynamically by JavaScript -->
+            </div>
+
+            <!-- Empty State Container -->
+            <div id="emptyState" class="hidden glass-card rounded-2xl p-12 text-center max-w-md mx-auto my-8">
+                <div class="w-20 h-20 bg-brand-50 dark:bg-slate-800 text-brand-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                    <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200">Tidak ada tugas ditemukan</h3>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Buat tugas baru atau coba ubah kata kunci filter pencarian Anda.</p>
+                <button onclick="openModal()" class="mt-5 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-medium shadow-md transition-all">
+                    + Tambah Tugas Baru
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal Dialog Add/Edit Task -->
+    <div id="taskModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-card bg-white dark:bg-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200/80 dark:border-slate-700/80 transform scale-95 transition-transform duration-300" id="modalContainer">
+            
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-700">
+                <h3 id="modalTitle" class="text-xl font-bold text-slate-800 dark:text-white">Tambah Tugas Baru</h3>
+                <button onclick="closeModal()" class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Form -->
+            <form id="taskForm" class="space-y-4 mt-4" onsubmit="handleTaskSubmit(event)">
+                <input type="hidden" id="taskId">
+
+                <!-- Title Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Judul Tugas *</label>
+                    <input type="text" id="taskTitle" required placeholder="Contoh: Desain Landing Page Aplikasi" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+
+                <!-- Description Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Deskripsi Singkat</label>
+                    <textarea id="taskDesc" rows="2" placeholder="Catatan detail mengenai tugas..." class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all"></textarea>
+                </div>
+
+                <!-- Category & Priority Row -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Category Tag -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Kategori / Tag</label>
+                        <select id="taskCategory" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                            <option value="Pekerjaan">💼 Pekerjaan</option>
+                            <option value="Pribadi">👤 Pribadi</option>
+                            <option value="Belajar">📚 Belajar</option>
+                            <option value="Proyek">🚀 Proyek</option>
+                            <option value="Lainnya">📌 Lainnya</option>
+                        </select>
+                    </div>
+
+                    <!-- Priority level -->
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Prioritas</label>
+                        <select id="taskPriority" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                            <option value="rendah">🟢 Rendah</option>
+                            <option value="sedang" selected>🟡 Sedang</option>
+                            <option value="tinggi">🔴 Tinggi</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Due Date Input -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-1">Tenggat Waktu (Due Date)</label>
+                    <input type="date" id="taskDueDate" class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/60 rounded-xl transition-all">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 text-sm font-medium bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-md transition-all">Simpan Tugas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-6 border-t border-slate-200/60 dark:border-slate-800/60 text-center text-xs text-slate-400">
+        <p>&copy; 2026 TaskMaster Dashboard. Dirancang untuk Produktivitas Maksimal.</p>
+    </footer>
+
+    <script>
+        // State Management Variables
+        let tasks = [];
+        let currentFilterStatus = 'all';
+        let searchQuery = '';
+
+        // Initial DOM Load Setup
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            loadTasksFromStorage();
+            setupEventListeners();
+            renderTasks();
+        });
+
+        // --- Theme Toggle Logic ---
+        function initTheme() {
+            const savedTheme = localStorage.getItem('tm_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+                document.getElementById('sunIcon').classList.remove('hidden');
+            } else {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('moonIcon').classList.remove('hidden');
+            }
+        }
+
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('tm_theme', isDark ? 'dark' : 'light');
+            
+            document.getElementById('sunIcon').classList.toggle('hidden', !isDark);
+            document.getElementById('moonIcon').classList.toggle('hidden', isDark);
+            showToast(isDark ? 'Mode Gelap diaktifkan' : 'Mode Terang diaktifkan', 'info');
+        });
+
+        // --- Storage Management ---
+        function loadTasksFromStorage() {
+            const data = localStorage.getItem('tm_tasks');
+            if (data) {
+                try {
+                    tasks = JSON.parse(data);
+                } catch (e) {
+                    console.error('Gagal membaca data LocalStorage', e);
+                    tasks = [];
+                }
+            } else {
+                // Default sample tasks if first time
+                tasks = [
+                    {
+                        id: '1',
+                        title: 'Membuat Laporan Mingguan Projek',
+                        desc: 'Menyiapkan slide presentasi dan grafik kemajuan proyek.',
+                        category: 'Pekerjaan',
+                        priority: 'tinggi',
+                        dueDate: new Date().toISOString().split('T')[0],
+                        completed: false,
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: '2',
+                        title: 'Belajar Konsep Tailwind CSS & JS ES6',
+                        desc: 'Mempelajari pembuatan UI modern yang responsif.',
+                        category: 'Belajar',
+                        priority: 'sedang',
+                        dueDate: '',
+                        completed: true,
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                saveTasksToStorage();
+            }
+        }
+
+        function saveTasksToStorage() {
+            localStorage.setItem('tm_tasks', JSON.stringify(tasks));
+            updateDashboardStats();
+        }
+
+        // --- Event Listeners Setup ---
+        function setupEventListeners() {
+            // Search Input Listener
+            document.getElementById('searchInput').addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase();
+                renderTasks();
+            });
+        }
+
+        // --- Filter Functions ---
+        function setFilterStatus(status) {
+            currentFilterStatus = status;
+            
+            // Update UI buttons styling
+            const buttons = {
+                all: document.getElementById('filterAll'),
+                active: document.getElementById('filterActive'),
+                completed: document.getElementById('filterCompleted')
+            };
+
+            Object.keys(buttons).forEach(key => {
+                if (key === status) {
+                    buttons[key].className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 font-semibold shadow-sm transition-all";
+                } else {
+                    buttons[key].className = "px-3 py-1.5 rounded-lg transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+                }
+            });
+
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            const emptyState = document.getElementById('emptyState');
+            const priorityFilter = document.getElementById('priorityFilter').value;
+
+            // Filter logic
+            const filtered = tasks.filter(task => {
+                // Search filter
+                const matchesSearch = task.title.toLowerCase().includes(searchQuery) || 
+                                     (task.desc && task.desc.toLowerCase().includes(searchQuery));
+                
+                // Status filter
+                let matchesStatus = true;
+                if (currentFilterStatus === 'active') matchesStatus = !task.completed;
+                if (currentFilterStatus === 'completed') matchesStatus = task.completed;
+
+                // Priority filter
+                let matchesPriority = true;
+                if (priorityFilter !== 'all') matchesPriority = task.priority === priorityFilter;
+
+                return matchesSearch && matchesStatus && matchesPriority;
+            });
+
+            // Handle Empty State
+            if (filtered.length === 0) {
+                taskList.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                updateDashboardStats();
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+
+            // Render HTML
+            taskList.innerHTML = filtered.map(task => {
+                // Priority badges
+                let priorityClass = '';
+                let priorityLabel = '';
+                if (task.priority === 'tinggi') {
+                    priorityClass = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50';
+                    priorityLabel = 'Tinggi';
+                } else if (task.priority === 'sedang') {
+                    priorityClass = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-900/50';
+                    priorityLabel = 'Sedang';
+                } else {
+                    priorityClass = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/50';
+                    priorityLabel = 'Rendah';
+                }
+
+                // Due date formatting
+                let formattedDate = '';
+                if (task.dueDate) {
+                    const dateObj = new Date(task.dueDate);
+                    formattedDate = dateObj.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                }
+
+                return `
+                    <div id="task-${task.id}" class="task-item task-enter glass-card rounded-2xl p-4 sm:p-5 flex items-start justify-between gap-4 border border-slate-200/80 dark:border-slate-800 ${task.completed ? 'opacity-70 bg-slate-100/50 dark:bg-slate-800/30' : ''}">
+                        <div class="flex items-start gap-3.5 flex-1 min-w-0">
+                            <!-- Custom Checkbox -->
+                            <button onclick="toggleTaskStatus('${task.id}')" class="mt-1 flex-shrink-0 w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${task.completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-600 hover:border-brand-500'}">
+                                ${task.completed ? `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>` : ''}
+                            </button>
+
+                            <div class="flex-1 min-w-0 space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <h4 class="text-base font-semibold text-slate-800 dark:text-slate-100 truncate ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}">
+                                        ${escapeHtml(task.title)}
+                                    </h4>
+                                    <!-- Priority Badge -->
+                                    <span class="px-2.5 py-0.5 text-xs rounded-md border ${priorityClass} font-medium">
+                                        ${priorityLabel}
+                                    </span>
+                                </div>
+
+                                ${task.desc ? `<p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 ${task.completed ? 'line-through opacity-70' : ''}">${escapeHtml(task.desc)}</p>` : ''}
+
+                                <div class="flex flex-wrap items-center gap-4 text-xs text-slate-400 dark:text-slate-500 pt-1">
+                                    <!-- Category Tag -->
+                                    <span class="flex items-center gap-1 font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2.5 py-1 rounded-md">
+                                        ${escapeHtml(task.category || 'Umum')}
+                                    </span>
+
+                                    <!-- Due Date -->
+                                    ${task.dueDate ? `
+                                        <span class="flex items-center gap-1 ${isOverdue(task.dueDate) && !task.completed ? 'text-rose-500 font-semibold' : ''}">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                            </svg>
+                                            ${formattedDate}
+                                        </span>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task Actions -->
+                        <div class="flex items-center gap-1">
+                            <button onclick="editTask('${task.id}')" title="Edit Tugas" class="p-2 rounded-xl text-slate-400 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            <button onclick="deleteTask('${task.id}')" title="Hapus Tugas" class="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateDashboardStats();
+        }
+
+        // --- Dashboard Stats Calculation ---
+        function updateDashboardStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.completed).length;
+            const pending = total - completed;
+            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+
+            document.getElementById('statTotal').innerText = total;
+            document.getElementById('statPending').innerText = pending;
+            document.getElementById('statCompleted').innerText = completed;
+            document.getElementById('statPercentText').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        // --- Task Actions (Add/Edit/Delete/Toggle) ---
+        function toggleTaskStatus(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasksToStorage();
+                renderTasks();
+                showToast(task.completed ? 'Tugas ditandai selesai! 🎉' : 'Tugas dikembalikan ke aktif', 'success');
+            }
+        }
+
+        function deleteTask(id) {
+            const el = document.getElementById(`task-${id}`);
+            if (el) {
+                el.classList.remove('task-enter');
+                el.classList.add('task-exit');
+                setTimeout(() => {
+                    tasks = tasks.filter(t => t.id !== id);
+                    saveTasksToStorage();
+                    renderTasks();
+                    showToast('Tugas telah dihapus', 'info');
+                }, 250);
+            }
+        }
+
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            document.getElementById('taskId').value = task.id;
+            document.getElementById('taskTitle').value = task.title;
+            document.getElementById('taskDesc').value = task.desc || '';
+            document.getElementById('taskCategory').value = task.category || 'Pekerjaan';
+            document.getElementById('taskPriority').value = task.priority || 'sedang';
+            document.getElementById('taskDueDate').value = task.dueDate || '';
+
+            document.getElementById('modalTitle').innerText = 'Edit Tugas';
+            openModal();
+        }
+
+        function handleTaskSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('taskId').value;
+            const title = document.getElementById('taskTitle').value.trim();
+            const desc = document.getElementById('taskDesc').value.trim();
+            const category = document.getElementById('taskCategory').value;
+            const priority = document.getElementById('taskPriority').value;
+            const dueDate = document.getElementById('taskDueDate').value;
+
+            if (!title) return;
+
+            if (id) {
+                // Update existing task
+                const index = tasks.findIndex(t => t.id === id);
+                if (index !== -1) {
+                    tasks[index] = { ...tasks[index], title, desc, category, priority, dueDate };
+                    showToast('Tugas berhasil diperbarui', 'success');
+                }
+            } else {
+                // Create new task
+                const newTask = {
+                    id: Date.now().toString(),
+                    title,
+                    desc,
+                    category,
+                    priority,
+                    dueDate,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                tasks.unshift(newTask);
+                showToast('Tugas baru telah ditambahkan', 'success');
+            }
+
+            saveTasksToStorage();
+            closeModal();
+            renderTasks();
+        }
+
+        // --- Modal Dialog Handling ---
+        function openModal() {
+            const modal = document.getElementById('taskModal');
+            const container = document.getElementById('modalContainer');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            container.classList.remove('scale-95');
+            container.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('taskModal');
+            const container = document.getElementById('modalContainer');
+            
+            container.classList.remove('scale-100');
+            container.classList.add('scale-95');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+
+            // Reset form
+            setTimeout(() => {
+                document.getElementById('taskForm').reset();
+                document.getElementById('taskId').value = '';
+                document.getElementById('modalTitle').innerText = 'Tambah Tugas Baru';
+            }, 300);
+        }
+
+        // --- Toast Notifications ---
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = 'bg-slate-800 text-white';
+            if (type === 'success') bgClass = 'bg-emerald-600 text-white';
+            if (type === 'error') bgClass = 'bg-rose-600 text-white';
+
+            toast.className = `px-4 py-3 rounded-xl shadow-xl text-sm font-medium flex items-center gap-2 transform transition-all duration-300 translate-y-8 opacity-0 ${bgClass}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate in
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-8', 'opacity-0');
+            });
+
+            // Animate out
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- Helper Utilities ---
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        function isOverdue(dueDateStr) {
+            if (!dueDateStr) return false;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(dueDateStr);
+            return due < today;
+        }
+    </script>
+</body>
+</html>
